@@ -12,5 +12,5 @@
 
 #ifndef GET_NEXT_LINE
 # define GET_NEXT_LINE
-# define BUFF_SIZE 32
+# define BUFF_SIZE 3
 #endif
