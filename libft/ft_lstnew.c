@@ -28,7 +28,7 @@ t_list	*ft_lstnew(void const *content, size_t content_size)
 			free(lst);
 			return (0);
 		}
-		lst->content = ft_memcpy(lst->content, content, lst->content_size);
+		lst->content = (char*)content; /* changes */
 	}
 	else
 	{
