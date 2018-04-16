@@ -20,71 +20,75 @@ t_list	*find_elem(t_list **lst, int fd)
 {
 	t_list *tmp;
 
+	if (*lst == 0)
+	{
+		*lst = ft_lstnew("", fd);
+		return (*lst);
+	}
 	tmp = *lst;
-	while (tmp)
+	while (tmp->next)
 	{
 		if (tmp->content_size == fd)
-		{
-			printf("%i found\n", fd);
 			return (tmp);
-		}
 		tmp = tmp->next;
 	}
-	// ft_lstaddend(lst, ft_lstnew("", fd));
-	tmp = ft_lstnew("", fd);
-	// printf("%s\n", tmp->content);
+	if (tmp->content_size == fd)
+		return (tmp);
+	tmp->next = ft_lstnew("", fd);
 	return (tmp);
 }
 
-void	lst_show(t_list *lst)
+void	lst_show(t_list *tmp)
 {
-	printf("\n");
-	while (lst)
+	printf("LIST:\n");
+	while (tmp)
 	{
-		printf("%zu '%s'\n", lst->content_size, lst->content);
-		lst = lst->next;
+		printf("%zu '%s'\n", tmp->content_size, tmp->content);
+		tmp = tmp->next;
 	}
+	printf("\n");
+}
+
+void	cut_content()
+{
+	
 }
 
 int		get_next_line(const int fd, char **line)
 {
 	static t_list	*lst;
 	t_list			*elem;
-	static char		*reserve;
-	char			buf[BUFF_SIZE];
-	void			*tmp;
-	void			*bufend;
+	char			buf[BUFF_SIZE + 1];
+	char			*tmp;
 
 	elem = find_elem(&lst, fd);
-	reserve = elem->content;
+	// lst_show(lst);
 	if (fd < 0 || read(fd, buf, 0) == -1)
 		return (-1);
-	// if (reserve == 0)
-		// reserve = ft_strdup("");
-	while (!ft_strchr(reserve, '\n'))
+	while (!ft_strchr(elem->content, '\n'))
 	{
-		ft_bzero(buf, BUFF_SIZE);
+		ft_bzero(buf, BUFF_SIZE + 1);
 		read(fd, buf, BUFF_SIZE);
-		if (buf[0] == '\0' && reserve[0] == '\0')
+		if (buf[0] == '\0' && &elem->content[0] == '\0')
 			return (0);
 		if (buf[0] == '\0')
 		{
-			*line = reserve;
-			ft_memdel((void*)&reserve);
+			*line = elem->content;
+			// free(elem);
 			return (1);
 		}
-		tmp = reserve;
-		bufend = ft_strsub(buf, 0, BUFF_SIZE);
-		reserve = ft_strjoin(reserve, bufend);
-		// ft_memdel(&tmp);
-		// ft_memdel(&bufend);
-		// printf("reserve: '%s'\n", reserve);
+		tmp = elem->content;
+		elem->content = ft_strjoin(elem->content, buf);
+		ft_strdel(&tmp);
 	}
-	*line = ft_strsub(reserve, 0, ft_strchr(reserve, '\n') - reserve);
-	tmp = reserve;
-	reserve = ft_strsub(reserve, ft_strchr(reserve, '\n') - reserve + 1,
-		ft_strlen(reserve) - (ft_strchr(reserve, '\n') - reserve) - 1);
-	// ft_memdel(&tmp);
+	*line = ft_strsub(elem->content, 0, ft_strchr(elem->content, '\n') - (char*)elem->content);
+	tmp = elem->content;
+	elem->content = ft_strsub(elem->content, ft_strchr(elem->content, '\n') - (char*)elem->content + 1,
+		ft_strlen(elem->content) - (ft_strchr(elem->content, '\n') - (char*)elem->content) - 1);
+	ft_strdel(&tmp);
+	// free(elem->content);
+	// free(elem);
+	// lst_show(lst);
 	return (1);
 }
 
@@ -95,29 +99,27 @@ int		main(void)
 	int fd1 = open("test", O_RDONLY);
 	int fd2 = open("test2", O_RDONLY);
 	int fd3 = open("test3", O_RDONLY);
-	// get_next_line(fd, &line);
+
+	// t_list *lst;
+	// find_elem(&lst, 5);
+	// find_elem(&lst, 4);
+	// find_elem(&lst, 5);
+	// find_elem(&lst, 4);
+	// lst_show(lst);
+
 	int i = -1;
 	while (++i < 5)
 	{
 		printf("res: %i line: %s\n", get_next_line(fd1, &line), line);
-		ft_memdel((void*)&line);
+		if (ft_strlen(line) != 0)
+			free(line);
+		printf("res: %i line: %s\n", get_next_line(fd2, &line), line);
+		if (ft_strlen(line) != 0)
+			free(line);
+		printf("res: %i line: %s\n", get_next_line(fd3, &line), line);
+		if (ft_strlen(line) != 0)
+			free(line);
 	}
-	// system("leaks a.out");
+	system("leaks a.out");
 	return (0);
 }
-
-
-
-// int		main(void)
-// {
-// 	t_list *lst;
-// 	lst = 0;
-
-// 	find_elem(&lst, 1);
-// 	find_elem(&lst, 2);
-// 	find_elem(&lst, 1);
-// 	find_elem(&lst, 3);
-// 	find_elem(&lst, 1);
-// 	lst_show(lst);
-// 	return (0);
-// }
