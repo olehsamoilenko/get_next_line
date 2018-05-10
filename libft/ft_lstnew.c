@@ -22,7 +22,7 @@ t_list	*ft_lstnew(void const *content, size_t content_size)
 	lst->content_size = content_size;
 	if (content != 0)
 	{
-		lst->content = malloc(ft_strlen(content));
+		lst->content = ft_strdup(content);
 		if (!lst->content)
 		{
 			free(lst);

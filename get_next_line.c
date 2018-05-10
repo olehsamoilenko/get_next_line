@@ -40,7 +40,7 @@ static t_list	*find_elem(t_list **lst, int fd)
 	return (tmp->next);
 }
 
-static void		cut_line(char **line, char **content, char **buf)
+static void		cut_line(char **line, char **content)
 {
 	char	*tmp;
 
@@ -49,7 +49,6 @@ static void		cut_line(char **line, char **content, char **buf)
 	*content = ft_strsub(*content, ft_strchr(*content, '\n') - *content + 1,
 		ft_strlen(*content) - (ft_strchr(*content, '\n') - *content) - 1);
 	ft_strdel(&tmp);
-	ft_strdel(buf);
 }
 
 static void		add_to_buf(char **content, char *buf)
@@ -65,11 +64,10 @@ int				get_next_line(const int fd, char **line)
 {
 	static t_list	*lst;
 	t_list			*elem;
-	char			*buf;
+	char			buf[BUFF_SIZE + 1];
 
-	buf = (char*)malloc(sizeof(char) * (BUFF_SIZE + 1));
 	elem = find_elem(&lst, fd);
-	if (fd < 0 || read(fd, buf, 0) == -1 || !buf)
+	if (fd < 0 || read(fd, buf, 0) == -1 || BUFF_SIZE <= 0)
 		return (-1);
 	while (!ft_strchr(elem->content, '\n'))
 	{
@@ -80,11 +78,11 @@ int				get_next_line(const int fd, char **line)
 		if (ft_strequ(buf, "") == 1)
 		{
 			*line = ft_strdup(elem->content);
-			elem->content = "";
+			ft_strclr(elem->content);
 			return (1);
 		}
 		add_to_buf((char**)&elem->content, buf);
 	}
-	cut_line(line, (char**)&elem->content, &buf);
+	cut_line(line, (char**)&elem->content);
 	return (1);
 }
